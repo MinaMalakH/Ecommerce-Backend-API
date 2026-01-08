@@ -8,6 +8,8 @@ const {
   login,
   refreshAccessToken,
   logout,
+  verifyEmail,
+  resendVerification,
 } = require("../controllers/auth.controller");
 
 const { validate } = require("../middlewares/validation");
@@ -23,5 +25,6 @@ router.post("/register", validate(userRegistrationSchema), register);
 router.post("/login", validate(userLoginSchema), login);
 router.post("/refresh", refreshAccessToken);
 router.post("/logout", protect, logout);
-
+router.get("/verify-email", verifyEmail);
+router.get("/resend-verification", resendVerification);
 module.exports = router;
