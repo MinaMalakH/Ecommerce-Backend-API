@@ -156,3 +156,46 @@ exports.resendVerification = async (req, res) => {
     });
   }
 };
+/*
+ * Get User Profile after Login
+ * GET /auth/getMe
+ */
+exports.getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    user: req.user,
+  });
+};
+
+/**
+ * Change Password
+ * POST /auth/change-password
+ */
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Call service with user ID from the 'protect' middleware
+    await authService.updateUserPassword(
+      req.user._id,
+      currentPassword,
+      newPassword
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully. Please login again.",
+    });
+  } catch (error) {
+    if (error.message === "INCORRECT_PASSWORD") {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    console.error("Change password error:", error);
+    res.status(500).json({ message: "Server error while changing password" });
+  }
+};

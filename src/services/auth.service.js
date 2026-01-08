@@ -160,3 +160,26 @@ exports.processResendVerification = async (email) => {
     token: verificationToken,
   };
 };
+
+/**
+ * Change user password and invalidate sessions
+ */
+exports.updateUserPassword = async (userId, currentPassword, newPassword) => {
+  // 1. Fetch user with password field
+  const user = await User.findById(userId).select("+password");
+  if (!user) throw new Error("USER_NOT_FOUND");
+
+  // 2. Verify current password
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) throw new Error("INCORRECT_PASSWORD");
+
+  // 3. Update password (pre-save hooks in Model will hash this)
+  user.password = newPassword;
+  await user.save();
+
+  // 4. Security: Delete all refresh tokens for this user
+  // This forces the user to log in again on all devices
+  await RefreshToken.deleteMany({ userId: user._id });
+
+  return true;
+};

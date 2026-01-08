@@ -10,6 +10,7 @@ const {
   logout,
   verifyEmail,
   resendVerification,
+  getMe,
 } = require("../controllers/auth.controller");
 
 const { validate } = require("../middlewares/validation");
@@ -27,4 +28,5 @@ router.post("/refresh", refreshAccessToken);
 router.post("/logout", protect, logout);
 router.get("/verify-email", verifyEmail);
 router.get("/resend-verification", resendVerification);
+router.get("/me", protect, getMe);
 module.exports = router;
