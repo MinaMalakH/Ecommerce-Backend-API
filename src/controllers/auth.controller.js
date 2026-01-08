@@ -14,7 +14,7 @@ const {
  */
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password } = req.validatedData;
 
   try {
     // Step 1: Check if email already exist
@@ -51,7 +51,7 @@ exports.register = async (req, res) => {
  * Body: { email, password }
  */
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req.validatedData;
 
   try {
     // Step 1 : Find user by email (include password for verification)
@@ -86,52 +86,84 @@ exports.login = async (req, res) => {
   }
 };
 exports.refreshAccessToken = async (req, res) => {
-  const { refreshToken } = req.body;
+  try {
+    const { refreshToken } = req.body;
 
-  if (!refreshToken) {
-    return res.status(401).json({ message: "Refresh Token Required" });
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Refresh Token Required" });
+    }
+
+    // Step 1: Validate the old refresh token in DB
+    const storedToken = await RefreshToken.findOne({
+      refreshToken: refreshToken,
+    });
+    if (!storedToken) {
+      return res.status(403).json({ message: "Invalid Refresh Token" });
+    }
+
+    const user = await User.findById(storedToken.userId);
+    if (!user || !user.isActive) {
+      return res.status(403).json({ message: "User Not Found" });
+    }
+
+    // Step 3: Delete old refresh token (rotation)
+    await storedToken.deleteOne();
+
+    // Step 4: Generate new access & refresh tokens
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken();
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+
+    await RefreshToken.create({
+      userId: user._id,
+      refreshToken: newRefreshToken,
+      expiresAt,
+    });
+
+    // Step 4: Return new tokens
+    res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error" + error });
   }
-
-  // Step 1: Validate the old refresh token in DB
-  const storedToken = await RefreshToken.findOne({
-    refreshToken: refreshToken,
-  });
-  if (!storedToken) {
-    return res.status(403).json({ message: "Invalid Refresh Token" });
-  }
-
-  const user = await User.findById(storedToken.userId);
-  if (!user || !user.isActive) {
-    return res.status(403).json({ message: "User Not Found" });
-  }
-
-  // Step 2: Delete old refresh token (rotation)
-  await storedToken.deleteOne();
-
-  // Step 3: Generate new access & refresh tokens
-  const newAccessToken = generateAccessToken(user);
-  const newRefreshToken = generateRefreshToken();
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
-
-  await RefreshToken.create({
-    userId: user._id,
-    refreshToken: newRefreshToken,
-    expiresAt,
-  });
-
-  // Step 4: Return new tokens
-  res.status(200).json({
-    accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
-  });
 };
 
 exports.logout = async (req, res) => {
-  const { refreshToken } = req.body;
-  if (refreshToken) {
-    await RefreshToken.deleteOne({ token: refreshToken });
+  try {
+    // 1. Get refresh token from httpOnly cookie (not body)
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: "No refresh token provided",
+      });
+    }
+    // 2. Verify the token belongs to the authenticated user
+    const tokenRecord = await RefreshToken.findOne({
+      refreshToken: refreshToken,
+      userId: req.user._id, // From protect middleware
+    });
+
+    if (!tokenRecord) {
+      // Token doesn't exist or doesn't belong to this user
+      return res.status(400).json({
+        message: "Invalid refresh token",
+      });
+    }
+    // 3. Delete the refresh token from database
+    await RefreshToken.deleteOne({
+      refreshToken: refreshToken,
+      userId: req.user._id,
+    });
+
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      message: "Error during logout",
+    });
   }
-  res.status(200).json({ message: "Logged out successfully" });
 };
