@@ -24,4 +24,4 @@ const validate = (schema) => {
   };
 };
 
-module.exports = { validate, checkEmailExists };
+module.exports = { validate };

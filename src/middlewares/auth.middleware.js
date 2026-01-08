@@ -15,7 +15,7 @@ exports.protect = async (req, res, next) => {
     res.status(401).json({ message: "Not authorized, Token missing" });
   }
   try {
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_EXPIRES);
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 
     const user = await User.findById(decoded.userId).select("-password");
     if (!user || !user.isActive) {
@@ -24,6 +24,7 @@ exports.protect = async (req, res, next) => {
     req.user = user; // attach user to request
     next();
   } catch (error) {
+    console.log(error);
     return res.status(401).json({ message: "Invalid or Expired Token" });
   }
 };
