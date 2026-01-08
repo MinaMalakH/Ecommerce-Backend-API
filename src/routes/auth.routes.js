@@ -11,6 +11,7 @@ const {
   verifyEmail,
   resendVerification,
   getMe,
+  changePassword,
 } = require("../controllers/auth.controller");
 
 const { validate } = require("../middlewares/validation");
@@ -29,4 +30,6 @@ router.post("/logout", protect, logout);
 router.get("/verify-email", verifyEmail);
 router.get("/resend-verification", resendVerification);
 router.get("/me", protect, getMe);
+router.patch("/change-password", protect, changePassword);
+
 module.exports = router;
