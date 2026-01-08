@@ -1,11 +1,5 @@
-const jwt = require("jsonwebtoken");
-const { issueTokens } = require("../services/auth.service");
-const RefreshToken = require("../models/RefreshToken");
-const User = require("../models/User");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../utils/tokens");
+const authService = require("../services/auth.service");
+const { sendVerificationEmail } = require("../services/email.service");
 
 /**
  * Register a new user
@@ -14,34 +8,26 @@ const {
  */
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.validatedData;
-
   try {
-    // Step 1: Check if email already exist
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
-    }
-
-    // Step 2: Create New User (Password is hashed automatically)
-    const user = await User.create({ name, email, password });
-
-    // Step 3: Issue tokens
-    const tokens = await issueTokens(user);
-
-    // Step 4: return user info (exclude password) + Tokens
+    const { user, verificationToken } = await authService.registerUser(
+      req.validatedData
+    );
+    await sendVerificationEmail(user.email, verificationToken, user.name);
     res.status(201).json({
+      message:
+        "Registration Successful! Please Check Your Email To Verify Your Account",
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
       },
-      ...tokens,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    if (error.message === "EMAIL_EXISTS") {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+    res.status(500).json({ message: "Server Error" + error });
   }
 };
 
@@ -51,26 +37,10 @@ exports.register = async (req, res) => {
  * Body: { email, password }
  */
 exports.login = async (req, res) => {
-  const { email, password } = req.validatedData;
-
   try {
-    // Step 1 : Find user by email (include password for verification)
-    const user = await User.findOne({ email }).select("+password");
+    const { email, password } = req.validatedData;
+    const { user, tokens } = await authService.loginUser(email, password);
 
-    if (!user || !user.isActive) {
-      return res.status(401).json({ message: "Invalid Credentials" });
-    }
-
-    // Step 2: Compare password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid Credentials" });
-    }
-
-    // Step 3: Issue Tokens
-    const tokens = await issueTokens(user);
-
-    // Step 4: Return user info (without password) + tokens
     res.status(200).json({
       user: {
         id: user._id,
@@ -81,89 +51,108 @@ exports.login = async (req, res) => {
       ...tokens,
     });
   } catch (error) {
-    console.error(error);
+    if (error.message === "INVALID_CREDENTIALS") {
+      return res.status(401).json({ message: "Invalid Credentials" });
+    }
     res.status(500).json({ message: "Server Error" });
   }
 };
 exports.refreshAccessToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-
-    if (!refreshToken) {
+    if (!refreshToken)
       return res.status(401).json({ message: "Refresh Token Required" });
-    }
 
-    // Step 1: Validate the old refresh token in DB
-    const storedToken = await RefreshToken.findOne({
-      refreshToken: refreshToken,
-    });
-    if (!storedToken) {
-      return res.status(403).json({ message: "Invalid Refresh Token" });
-    }
-
-    const user = await User.findById(storedToken.userId);
-    if (!user || !user.isActive) {
-      return res.status(403).json({ message: "User Not Found" });
-    }
-
-    // Step 3: Delete old refresh token (rotation)
-    await storedToken.deleteOne();
-
-    // Step 4: Generate new access & refresh tokens
-    const newAccessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken();
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
-
-    await RefreshToken.create({
-      userId: user._id,
-      refreshToken: newRefreshToken,
-      expiresAt,
-    });
-
-    // Step 4: Return new tokens
-    res.status(200).json({
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    });
+    const tokens = await authService.refreshSession(refreshToken);
+    res.status(200).json(tokens);
   } catch (error) {
-    res.status(500).json({ message: "Error" + error });
+    const status = error.message === "INVALID_REFRESH_TOKEN" ? 403 : 500;
+    res.status(status).json({ message: error.message });
   }
 };
 
 exports.logout = async (req, res) => {
   try {
-    // 1. Get refresh token from httpOnly cookie (not body)
     const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res.status(400).json({
-        message: "No refresh token provided",
-      });
-    }
-    // 2. Verify the token belongs to the authenticated user
-    const tokenRecord = await RefreshToken.findOne({
-      refreshToken: refreshToken,
-      userId: req.user._id, // From protect middleware
-    });
-
-    if (!tokenRecord) {
-      // Token doesn't exist or doesn't belong to this user
-      return res.status(400).json({
-        message: "Invalid refresh token",
-      });
-    }
-    // 3. Delete the refresh token from database
-    await RefreshToken.deleteOne({
-      refreshToken: refreshToken,
-      userId: req.user._id,
-    });
-
+    await authService.revokeToken(refreshToken, req.user._id);
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    console.error("Logout error:", error);
+    res.status(400).json({ message: error.message });
+  }
+};
+
+/**
+ * Verify Email
+ * GET /auth/verify-email?token=...
+ */
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Verification Token is Required",
+      });
+    }
+
+    // Call the service
+    await authService.verifyUserEmail(token);
+
+    res.status(200).json({
+      message: "Email Verified Successfully! You Can Now Log In",
+    });
+  } catch (error) {
+    if (error.message === "INVALID_OR_EXPIRED_TOKEN") {
+      return res.status(400).json({
+        message: "Invalid Or Expired Verification Token",
+      });
+    }
+
+    console.error("Email verification error:", error);
     res.status(500).json({
-      message: "Error during logout",
+      message: "Server error during email verification",
+    });
+  }
+};
+
+/**
+ * Resend verification email
+ * POST /auth/resend-verification
+ */
+exports.resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // 1. Process business logic via service
+    const {
+      email: userEmail,
+      name,
+      token,
+    } = await authService.processResendVerification(email);
+
+    // 2. Trigger side effect (sending the actual email)
+    await sendVerificationEmail(userEmail, token, name);
+
+    res.status(200).json({
+      message: "Verification email sent! Please check your inbox.",
+    });
+  } catch (error) {
+    // Handle specific business logic errors
+    if (error.message === "USER_NOT_FOUND") {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (error.message === "ALREADY_VERIFIED") {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    console.error("Resend verification error:", error);
+    res.status(500).json({
+      message: "Server error while resending verification email",
     });
   }
 };
