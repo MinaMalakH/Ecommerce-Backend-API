@@ -9,8 +9,8 @@ const app = express();
 app.use(express.json());
 
 const authRouter = require("./src/routes/auth.routes");
-const categoryRoute = require("./src/routes/category.routes");
-
+const categoryRouter = require("./src/routes/category.routes");
+const productRouter = require("./src/routes/product.routes");
 // Health check route (before other routes for quick response)
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -23,7 +23,8 @@ app.get("/health", (req, res) => {
 
 // API Routes
 app.use("/api/auth", authRouter);
-app.use("/api/category", categoryRoute);
+app.use("/api/category", categoryRouter);
+app.use("/api/product", productRouter);
 
 // 404 Handler
 app.use((req, res) => {
