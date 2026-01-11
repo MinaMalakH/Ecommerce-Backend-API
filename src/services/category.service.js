@@ -4,7 +4,7 @@ const slugify = require("slugify");
 exports.createCategoryService = async (name, description, parent) => {
   const category = new Category({
     name,
-    description,
+    description: description || null,
     parent: parent || null,
     slug: slugify(name, { lower: true, strict: true }),
   });
@@ -13,7 +13,7 @@ exports.createCategoryService = async (name, description, parent) => {
 };
 
 exports.getAllCategories = async () => {
-  return await Category.find({ isActive: true }).populate("parent");
+  return await Category.find().populate("parent");
 };
 
 exports.getCategoryById = async (id) => {

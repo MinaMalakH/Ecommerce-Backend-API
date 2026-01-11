@@ -9,10 +9,11 @@ exports.createProduct = async (
   discountPrice,
   stock,
   category,
-  images,
+  file,
   userId
 ) => {
-  const categoryExists = await Category.findOnById(category);
+  // 1. Business Logic: Validate Category
+  const categoryExists = await Category.findById(category);
   if (!categoryExists) {
     throw new Error("Invalid Category");
   }
@@ -24,8 +25,11 @@ exports.createProduct = async (
     discountPrice,
     stock,
     category,
-    images,
-    slug: slugify(productData.name),
+    slug: slugify(name),
+    image: {
+      url: file.path,
+      publicId: file.filename,
+    },
     createdBy: userId,
   });
   await product.save();
