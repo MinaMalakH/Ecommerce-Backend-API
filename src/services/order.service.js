@@ -1,7 +1,7 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 
-exports.createOrder = async (items, shoppingAddress, paymentMethod, userId) => {
+exports.createOrder = async (items, shippingAddress, paymentMethod, userId) => {
   let totalAmount = 0;
   const orderItems = [];
   for (const item of items) {
@@ -34,7 +34,7 @@ exports.createOrder = async (items, shoppingAddress, paymentMethod, userId) => {
     userId: userId,
     items: orderItems,
     totalAmount,
-    shoppingAddress,
+    shippingAddress,
     paymentMethod,
   });
   return order;
