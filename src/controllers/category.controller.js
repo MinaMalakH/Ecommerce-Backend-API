@@ -3,11 +3,6 @@ const categoryService = require("../services/category.service");
 exports.createCategory = async (req, res) => {
   try {
     const { name, description, parent } = req.body;
-    if (!name || !description) {
-      return res
-        .status(400)
-        .json({ message: "Name and Description are Required" });
-    }
     const category = await categoryService.createCategoryService(
       name,
       description,
@@ -26,6 +21,7 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const categories = await categoryService.getAllCategories();
+    console.log(categories);
     res.status(200).json({ success: true, categories });
   } catch (error) {
     res

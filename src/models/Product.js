@@ -37,12 +37,16 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    images: [
-      {
-        url: String,
-        publicId: String, // for Cloudinary or S3
+    image: {
+      url: {
+        type: String,
+        required: true,
       },
-    ],
+      publicId: {
+        type: String,
+        required: true,
+      },
+    },
     isActive: {
       type: Boolean,
       default: true,

@@ -1,17 +1,38 @@
 const productService = require("../services/product.service");
+const cloudinary = require("../config/cloudinary");
 
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, discountPrice, stock, category, images } =
+    // Log to debug
+    console.log("req.body:", req.body);
+    console.log("req.file:", req.file);
+
+    const { name, description, price, discountPrice, stock, category } =
       req.body;
-    const product = productService.createProduct(
+
+    // Validate required fields
+    if (!name || !description || !price || !stock || !category) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing required fields: name, description, price, stock, category",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Product Image is Required",
+      });
+    }
+    const product = await productService.createProduct(
       name,
       description,
-      price,
-      discountPrice,
-      stock,
+      Number(price),
+      discountPrice ? Number(discountPrice) : undefined,
+      Number(stock),
       category,
-      images,
+      req.file,
       req.user._id
     );
     res.status(201).json({ success: true, product });
@@ -22,7 +43,7 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = productService.getAllActiveProducts();
+    const products = await productService.getAllActiveProducts();
     res.status(200).json({ success: true, products });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -45,7 +66,7 @@ exports.updateProduct = async (req, res) => {
       req.params.id,
       updates
     );
-    res.status(200).json({ success: true, product });
+    res.status(200).json({ success: true, newProduct });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

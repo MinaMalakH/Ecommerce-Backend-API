@@ -5,8 +5,9 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-// Middleware to parse JSON
-app.use(express.json());
+// ✅ Add these middlewares
+app.use(express.json()); // For parsing application/json
+app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
 
 const authRouter = require("./src/routes/auth.routes");
 const categoryRouter = require("./src/routes/category.routes");
