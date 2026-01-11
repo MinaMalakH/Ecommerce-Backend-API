@@ -2,13 +2,13 @@ const orderService = require("../services/order.service");
 
 exports.createOrder = async (req, res) => {
   try {
-    const { items, shoppingAddress, paymentMethod } = req.body;
+    const { items, shippingAddress, paymentMethod } = req.body;
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "Order Items Is Required" });
     }
     const order = await orderService.createOrder(
       items,
-      shoppingAddress,
+      shippingAddress,
       paymentMethod,
       req.user._id
     );

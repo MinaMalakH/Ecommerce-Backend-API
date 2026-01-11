@@ -55,8 +55,18 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
+    reviewsCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
+
+productSchema.index({ name: "text", description: "text" });
 
 module.exports = mongoose.model("Product", productSchema);

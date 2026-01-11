@@ -43,8 +43,25 @@ exports.createProduct = async (req, res) => {
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await productService.getAllActiveProducts();
-    res.status(200).json({ success: true, products });
+    const {
+      keyword,
+      category,
+      minPrice,
+      maxPrice,
+      minRating,
+      page = 1,
+      limit = 10,
+    } = req.query;
+    const result = await productService.getAllActiveProducts(
+      keyword,
+      category,
+      minPrice,
+      maxPrice,
+      minRating,
+      page,
+      limit
+    );
+    res.status(200).json({ success: true, ...result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

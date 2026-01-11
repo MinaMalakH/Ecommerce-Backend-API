@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
       default: "pending",
     },
-    shoppingAddress: {
+    shippingAddress: {
       address: String,
       city: String,
       country: String,
@@ -40,8 +40,16 @@ const orderSchema = new mongoose.Schema(
       enum: ["cod", "card"],
       default: "cod",
     },
+    paidAt: Date,
   },
   { timestamps: true }
 );
+orderSchema.pre("save", function (next) {
+  // Validate status transitions
+  if (this.status === "delivered" && !this.paidAt) {
+    return next(new Error("Order must be paid before marking as delivered"));
+  }
+  next();
+});
 
 module.exports = mongoose.model("Order", orderSchema);
