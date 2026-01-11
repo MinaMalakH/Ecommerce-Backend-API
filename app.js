@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true })); // For parsing application/x-ww
 const authRouter = require("./src/routes/auth.routes");
 const categoryRouter = require("./src/routes/category.routes");
 const productRouter = require("./src/routes/product.routes");
+const orderRouter = require("./src/routes/order.routes");
 // Health check route (before other routes for quick response)
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -26,6 +27,7 @@ app.get("/health", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/product", productRouter);
+app.use("/api/order", orderRouter);
 
 // 404 Handler
 app.use((req, res) => {
