@@ -19,6 +19,7 @@ const { validate } = require("../middlewares/validation");
 const {
   userRegistrationSchema,
   userLoginSchema,
+  changePasswordSchema,
 } = require("../validator/auth.validator");
 const User = require("../models/User");
 
@@ -30,6 +31,11 @@ router.post("/logout", protect, logout);
 router.get("/verify-email", verifyEmail);
 router.get("/resend-verification", resendVerification);
 router.get("/me", protect, getMe);
-router.patch("/change-password", protect, changePassword);
+router.patch(
+  "/change-password",
+  protect,
+  validate(changePasswordSchema),
+  changePassword
+);
 
 module.exports = router;

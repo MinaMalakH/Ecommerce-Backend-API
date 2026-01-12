@@ -3,10 +3,6 @@ const cloudinary = require("../config/cloudinary");
 
 exports.createProduct = async (req, res) => {
   try {
-    // Log to debug
-    console.log("req.body:", req.body);
-    console.log("req.file:", req.file);
-
     const { name, description, price, discountPrice, stock, category } =
       req.body;
 
