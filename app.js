@@ -2,8 +2,20 @@ const connectDB = require("./src/config/DB");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors"); // ✅ Add this
 
 const app = express();
+
+// ✅ CORS Configuration - Add this BEFORE other middlewares
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:3000", // Your frontend URL
+  credentials: true, // Allow cookies to be sent
+  optionsSuccessStatus: 200,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 
 // ✅ Add these middlewares
 app.use(express.json()); // For parsing application/json
@@ -13,6 +25,8 @@ const authRouter = require("./src/routes/auth.routes");
 const categoryRouter = require("./src/routes/category.routes");
 const productRouter = require("./src/routes/product.routes");
 const orderRouter = require("./src/routes/order.routes");
+const reviewRouter = require("./src/routes/review.routes");
+const adminRouter = require("./src/routes/admin.routes");
 // Health check route (before other routes for quick response)
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -28,6 +42,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/product", productRouter);
 app.use("/api/order", orderRouter);
+app.use("/api/review", reviewRouter);
+app.use("/api/admin", adminRouter);
 
 // 404 Handler
 app.use((req, res) => {

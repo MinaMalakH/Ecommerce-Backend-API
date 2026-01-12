@@ -39,7 +39,7 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const order = orderService.updateOrderStatus(req.user._id, status);
+    const order = orderService.updateOrderStatus(req.params.id, status);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }

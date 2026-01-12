@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const RefreshToken = require("../models/RefreshToken");
+const bcrypt = require("bcrypt"); // Add this at the top
+
 const crypto = require("crypto");
 
 const {
@@ -97,7 +99,7 @@ exports.sendVerifyEmail = async (email) => {
       err.statusCode = 400;
       throw err;
     }
-    const user = await User.findOne({ email: email.tolowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       const err = new Error("User Not Found With This Email");
       err.statusCode = 404;
