@@ -2,8 +2,6 @@
 
 Modern, secure, and scalable RESTful API built for e-commerce applications using **Node.js**, **Express**, **MongoDB**, and modern best practices.
 
-![Project Banner](https://via.placeholder.com/1280x400/4CAF50/FFFFFF?text=E-Commerce+Backend+API)  
-_(Replace with your own banner/screenshot when you have frontend integration)_
 
 ## ✨ Features
 
@@ -128,8 +126,8 @@ _(Replace with your own banner/screenshot when you have frontend integration)_
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR-USERNAME/ecommerce-backend.git
-cd ecommerce-backend
+git clone https://github.com/MinaMalakH/Ecommerce-Backend-API.git
+cd Ecommerce-Backend-API
 
 # Install dependencies
 npm install
