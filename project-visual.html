@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Commerce Backend API - Project Card</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+      }
+
+      .card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        padding: 60px;
+      }
+
+      .left-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        width: fit-content;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      h1 {
+        font-size: 48px;
+        color: #1a1a1a;
+        margin-bottom: 16px;
+        line-height: 1.2;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+
+      .features {
+        margin-bottom: 30px;
+      }
+
+      .feature {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: #444;
+      }
+
+      .feature-icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 12px;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        font-size: 16px;
+        margin-right: 15px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .cta-secondary {
+        background: transparent;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+
+      .cta-secondary:hover {
+        background: #667eea;
+        color: white;
+      }
+
+      .right-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .tech-stack {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .tech-item {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .tech-item:hover {
+        transform: translateY(-5px);
+      }
+
+      .tech-name {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+      }
+
+      .tech-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 40px;
+        padding-top: 40px;
+        border-top: 2px solid #e0e0e0;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #667eea;
+        display: block;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #999;
+        margin-top: 5px;
+      }
+
+      @media (max-width: 768px) {
+        .card {
+          grid-template-columns: 1fr;
+          padding: 40px 20px;
+          gap: 30px;
+        }
+
+        h1 {
+          font-size: 32px;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <div class="left-section">
+          <div class="badge">⭐ Open Source</div>
+          <h1>E-Commerce<br />Backend API</h1>
+          <p class="subtitle">
+            Modern, secure, and scalable RESTful API for e-commerce
+            applications. Built with Node.js, Express, and MongoDB.
+          </p>
+
+          <div class="features">
+            <div class="feature">
+              <div class="feature-icon">✓</div>
+              <span
+                ><strong>JWT Authentication</strong> with refresh tokens &
+                role-based access control</span
+              >
+            </div>
+            <div class="feature">
+              <div class="feature-icon">✓</div>
+              <span
+                ><strong>Complete CRUD</strong> for products, categories, orders
+                & reviews</span
+              >
+            </div>
+            <div class="feature">
+              <div class="feature-icon">✓</div>
+              <span
+                ><strong>Admin Dashboard</strong> with real-time analytics</span
+              >
+            </div>
+            <div class="feature">
+              <div class="feature-icon">✓</div>
+              <span
+                ><strong>Cloudinary Integration</strong> for image uploads</span
+              >
+            </div>
+          </div>
+
+          <div>
+            <a
+              href="https://github.com/MinaMalakH/Ecommerce-Backend-API"
+              class="cta-button"
+              >View on GitHub</a
+            >
+          </div>
+        </div>
+
+        <div class="right-section">
+          <div>
+            <div class="tech-stack">
+              <div class="tech-item">
+                <div class="tech-icon">🟢</div>
+                <div class="tech-name">Node.js</div>
+              </div>
+              <div class="tech-item">
+                <div class="tech-icon">⚡</div>
+                <div class="tech-name">Express</div>
+              </div>
+              <div class="tech-item">
+                <div class="tech-icon">🍃</div>
+                <div class="tech-name">MongoDB</div>
+              </div>
+              <div class="tech-item">
+                <div class="tech-icon">🔐</div>
+                <div class="tech-name">JWT Auth</div>
+              </div>
+              <div class="tech-item">
+                <div class="tech-icon">🖼️</div>
+                <div class="tech-name">Cloudinary</div>
+              </div>
+              <div class="tech-item">
+                <div class="tech-icon">✔️</div>
+                <div class="tech-name">Joi Validation</div>
+              </div>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <span class="stat-number">27+</span>
+                <span class="stat-label">API Endpoints</span>
+              </div>
+              <div class="stat">
+                <span class="stat-number">6</span>
+                <span class="stat-label">Main Features</span>
+              </div>
+              <div class="stat">
+                <span class="stat-number">MIT</span>
+                <span class="stat-label">License</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
